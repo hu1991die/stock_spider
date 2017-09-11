@@ -38,6 +38,8 @@ class StockSpider(Spider):
     dividend_url = "http://app.finance.ifeng.com/data/stock/tab_fhpxjl.php?symbol=%s"
     # 股票股本信息url
     holder_url = "http://app.finance.ifeng.com/data/stock/tab_gdgb.php?symbol=%s"
+    # 股票所属板块信息url
+    stock_type_url = "http://finance.ifeng.com/app/hq/stock/sh%s/index.shtml"
 
     start_urls = [
         base_url
@@ -153,6 +155,17 @@ class StockSpider(Spider):
             print("======提取股票分红配送记录信息dividend_url:" + dividend_url)
             yield Request(url=dividend_url, meta={'stock_code': stock_code, 'stock_name': stock_name},
                           callback=self.parseStockDividendRecord)
+
+        # 循环股票列表数据,提取股票所属板块（标签）信息
+        for stock_info in stock_sets:
+            stock_code = stock_info['stock_code'][0]
+            stock_name = stock_info['stock_name'][0]
+
+            # 提取股票所属板块信息
+            stock_type_url = self.stock_type_url % stock_code
+            print("======提取股票所属板块信息stock_type_url:" + stock_type_url)
+            yield Request(url=stock_type_url, meta={'stock_code': stock_code, 'stock_name': stock_name},
+                          callback=self.parseStockTypeData)
 
         # 循环股票列表数据，提取股票历史记录行情信息
         for stock_info in stock_sets:
@@ -335,3 +348,26 @@ class StockSpider(Spider):
 
             pass
             yield market_item
+
+    # 爬取股票所属板块信息数据
+    def parseStockTypeData(self, response):
+        stock_code = response.meta['stock_code']
+        stock_name = response.meta['stock_name']
+
+        # 抓取股票所属板块分类信息
+        div_content = response.xpath("//div[@class='picForme']")
+        if div_content is None:
+            return
+
+        # 抓取股票所属板块分类信息table
+        table_conent = div_content.xpath("table[@class='tabPic']/tr[position() = 3]")
+        if table_conent is None:
+            return
+
+        aList = table_conent.xpath("td[@class='lastBot']/a")
+        if aList is None:
+            return
+
+        for a in aList:
+            stock_type = a.xpath("text()").extract()
+
