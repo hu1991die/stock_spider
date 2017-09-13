@@ -61,7 +61,7 @@ class StockSpider(Spider):
 
         # 提取沪市A股下面所有的上市股票信息列表
         page_url = "?t=ha&f=chg_pct&o=desc&p="
-        for i in range(1, 2):
+        for i in range(1, 51):
             url = self.base_url + page_url + str(i)
             print("=======提取沪市A股下面所有的上市股票信息列表url：" + url)
             yield Request(url=url, meta={'index_code': index_code},
@@ -174,9 +174,9 @@ class StockSpider(Spider):
             stock_name = stock_info['stock_name'][0]
 
             # 循环从1990到2017年
-            for year in range(2017, 2018):
+            for year in range(1990, 2018):
                 # 每年四个季度
-                for quarter in range(1, 2):
+                for quarter in range(1, 5):
                     data_url = self.detail_url % (stock_code, year, quarter)
                     print("======提取股票历史记录行情信息data_url：" + data_url)
                     yield Request(url=data_url, meta={'stock_code': stock_code, 'stock_name': stock_name, 'year': year},
