@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50635
 File Encoding         : 65001
 
-Date: 2017-09-10 22:26:11
+Date: 2017-09-13 23:36:55
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -21,8 +21,8 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `stock_composite_index`;
 CREATE TABLE `stock_composite_index` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `index_code` varchar(20) DEFAULT NULL COMMENT '指数代码',
-  `index_name` varchar(20) DEFAULT NULL COMMENT '指数名称',
+  `index_code` varchar(40) DEFAULT NULL COMMENT '指数代码',
+  `index_name` varchar(64) DEFAULT NULL COMMENT '指数名称',
   `last_trade` decimal(14,2) DEFAULT NULL COMMENT '当前价',
   `index_change` decimal(14,2) DEFAULT NULL COMMENT '涨跌额',
   `chg` varchar(20) DEFAULT NULL COMMENT '涨跌幅',
@@ -41,8 +41,8 @@ CREATE TABLE `stock_composite_index` (
 DROP TABLE IF EXISTS `stock_composite_index_history`;
 CREATE TABLE `stock_composite_index_history` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `index_code` varchar(20) DEFAULT NULL COMMENT '指数代码',
-  `index_name` varchar(20) DEFAULT NULL COMMENT '指数名称',
+  `index_code` varchar(40) DEFAULT NULL COMMENT '指数代码',
+  `index_name` varchar(64) DEFAULT NULL COMMENT '指数名称',
   `opening` decimal(14,2) DEFAULT NULL COMMENT '开盘',
   `closing` decimal(14,2) DEFAULT NULL COMMENT '收盘',
   `index_change` decimal(14,2) DEFAULT NULL COMMENT '涨跌额',
@@ -63,7 +63,7 @@ DROP TABLE IF EXISTS `stock_dividend`;
 CREATE TABLE `stock_dividend` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `stock_code` varchar(20) NOT NULL COMMENT '股票代码',
-  `stock_name` varchar(20) DEFAULT NULL COMMENT '股票名称',
+  `stock_name` varchar(128) DEFAULT NULL COMMENT '股票名称',
   `ex_dividend_date` varchar(20) DEFAULT NULL COMMENT '除权除息日',
   `bonus_year` varchar(20) DEFAULT NULL COMMENT '分红年度',
   `dividend_value` varchar(20) DEFAULT NULL COMMENT '派息值',
@@ -71,7 +71,7 @@ CREATE TABLE `stock_dividend` (
   `create_time` date DEFAULT NULL COMMENT '创建时间',
   `dividend_mark` tinyint(4) DEFAULT '0' COMMENT '分红标志',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=271 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for stock_index
@@ -80,7 +80,7 @@ DROP TABLE IF EXISTS `stock_index`;
 CREATE TABLE `stock_index` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `index_code` varchar(40) NOT NULL COMMENT '大盘编码',
-  `index_name` varchar(40) DEFAULT NULL COMMENT '大盘名称',
+  `index_name` varchar(128) DEFAULT NULL COMMENT '大盘名称',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
@@ -92,10 +92,10 @@ DROP TABLE IF EXISTS `stock_info`;
 CREATE TABLE `stock_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `stock_code` varchar(20) NOT NULL COMMENT '股票代码',
-  `stock_name` varchar(40) DEFAULT NULL COMMENT '股票名称',
-  `index_code` varchar(60) DEFAULT NULL COMMENT '大盘编码',
+  `stock_name` varchar(128) DEFAULT NULL COMMENT '股票名称',
+  `index_code` varchar(40) DEFAULT NULL COMMENT '大盘编码',
   `last_trade` decimal(14,2) DEFAULT NULL COMMENT '当前最新交易价格',
-  `company_name` varchar(40) DEFAULT NULL COMMENT '公司名称',
+  `company_name` varchar(128) DEFAULT NULL COMMENT '公司名称',
   `launch_date` date DEFAULT NULL COMMENT '上市日期',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
@@ -108,7 +108,7 @@ DROP TABLE IF EXISTS `stock_market`;
 CREATE TABLE `stock_market` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键Id',
   `stock_code` varchar(20) NOT NULL COMMENT '股票代码',
-  `stock_name` varchar(20) DEFAULT NULL COMMENT '股票名称',
+  `stock_name` varchar(128) DEFAULT NULL COMMENT '股票名称',
   `trade_date` date DEFAULT NULL COMMENT '交易日期',
   `chg` varchar(20) DEFAULT NULL COMMENT '涨跌幅',
   `stock_change` decimal(14,2) DEFAULT NULL COMMENT '涨跌额',
@@ -128,7 +128,7 @@ CREATE TABLE `stock_market` (
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_stock_code` (`stock_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=2064 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1765 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for stock_share_holder
@@ -137,13 +137,27 @@ DROP TABLE IF EXISTS `stock_share_holder`;
 CREATE TABLE `stock_share_holder` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `stock_code` varchar(20) DEFAULT NULL COMMENT '股票代码',
-  `stock_name` varchar(40) DEFAULT NULL COMMENT '股票名称',
-  `holder_rank` char(2) DEFAULT NULL COMMENT '股东名次',
-  `holder_name` varchar(40) DEFAULT NULL COMMENT '股东名称',
+  `stock_name` varchar(128) DEFAULT NULL COMMENT '股票名称',
+  `holder_rank` char(10) DEFAULT NULL COMMENT '股东名次',
+  `holder_name` varchar(256) DEFAULT NULL COMMENT '股东名称',
   `hold_count` int(11) DEFAULT NULL COMMENT '持有数量(股)',
   `hold_rate` decimal(10,4) DEFAULT NULL COMMENT '持有比例(%)',
   `freezing_count` int(11) DEFAULT NULL COMMENT '冻结数量',
   `pledged_count` int(11) DEFAULT NULL COMMENT '质押数量',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=466 DEFAULT CHARSET=utf8 COMMENT='股东股本信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=495 DEFAULT CHARSET=utf8 COMMENT='股东股本信息表';
+
+-- ----------------------------
+-- Table structure for stock_type
+-- ----------------------------
+DROP TABLE IF EXISTS `stock_type`;
+CREATE TABLE `stock_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `stock_code` varchar(20) DEFAULT NULL COMMENT '股票代码',
+  `stock_name` varchar(128) DEFAULT NULL COMMENT '股票名称',
+  `stock_type_code` varchar(20) DEFAULT NULL COMMENT '股票分类表签编码',
+  `stock_type` varchar(64) DEFAULT NULL COMMENT '股票类型标签',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8 COMMENT='股票所属板块（标签）信息表';

@@ -17,6 +17,7 @@ from stock_spider.items import StockIndexItem
 from stock_spider.items import StockInfoItem
 from stock_spider.items import StockMarketItem
 from stock_spider.items import StockShareHolderItem
+from stock_spider.items import StockTypeItem
 from stock_spider.utils.CommonUtil import CommonUtil
 
 
@@ -351,7 +352,9 @@ class StockSpider(Spider):
 
     # 爬取股票所属板块信息数据
     def parseStockTypeData(self, response):
+        # 股票代码
         stock_code = response.meta['stock_code']
+        # 股票名称
         stock_name = response.meta['stock_name']
 
         # 抓取股票所属板块分类信息
@@ -364,10 +367,33 @@ class StockSpider(Spider):
         if table_conent is None:
             return
 
-        aList = table_conent.xpath("td[@class='lastBot']/a")
-        if aList is None:
+        # 提取股票分类标签信息所在的a标签列表
+        typeList = table_conent.xpath("td[@class='lastBot']/span/a")
+        if typeList is None:
             return
 
-        for a in aList:
-            stock_type = a.xpath("text()").extract()
+        # 循环a标签列表，提取标签编码信息和文本信息
+        for type in typeList:
+            # 股票标签编码code
+            stock_type_code = type.xpath(".//@href").extract_first()
+            stock_type_code = re.sub("\D", "", stock_type_code)
+            # 股票标签编码名称
+            stock_type = type.xpath(".//text()").extract_first()
+            # 创建时间
+            create_time = CommonUtil().getCreateTime()
+
+            # 打印
+            print(stock_code, stock_name, stock_type_code, stock_type, create_time)
+
+            stock_type_item = StockTypeItem()
+            stock_type_item['stock_code'] = stock_code
+            stock_type_item['stock_name'] = stock_name
+            stock_type_item['stock_type_code'] = stock_type_code
+            stock_type_item['stock_type'] = stock_type
+            stock_type_item['create_time'] = create_time
+
+            pass
+            yield stock_type_item
+
+
 

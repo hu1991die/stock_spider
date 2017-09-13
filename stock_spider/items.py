@@ -171,3 +171,16 @@ class StockCompositeIndexHistoryItem(Item):
     trade_date = Field()
     # 创建时间
     create_time = Field()
+
+# 股票所属板块（标签）信息表
+class StockTypeItem(Item):
+    # 股票代码
+    stock_code = Field()
+    # 股票名称
+    stock_name = Field()
+    # 股票类型标签code
+    stock_type_code = Field()
+    # 股票类型标签
+    stock_type = Field()
+    # 创建时间
+    create_time = Field()

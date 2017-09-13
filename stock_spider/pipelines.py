@@ -12,6 +12,7 @@ from stock_spider.items import StockIndexItem
 from stock_spider.items import StockInfoItem
 from stock_spider.items import StockMarketItem
 from stock_spider.items import StockShareHolderItem
+from stock_spider.items import StockTypeItem
 
 # 使用debug环境
 DEBUG = True
@@ -80,12 +81,14 @@ class StockSpiderPipeline(object):
             # raise DropItem("This item has scrpyed.")
         if item.__class__ == StockShareHolderItem:
             self.insertStockShareHolder(item)
+        if item.__class__ == StockTypeItem:
+            self.insertStockTypeItem(item)
         return item
 
     # 插入股票大盘信息表
     def insertStockIndex(self, item):
         try:
-            query_sql = """select COUNT(1) from stock_index where index_name = %s"""
+            query_sql = """SELECT COUNT(1) FROM stock_index WHERE index_name = %s"""
             print("===判断股票大盘信息sql:" + query_sql)
 
             # 执行SQL查询语句
@@ -155,7 +158,7 @@ class StockSpiderPipeline(object):
     def  insertStockMarket(self, item):
         try:
             # 根据股票编码查询之前是否已经爬取过
-            query_sql = """select count(1) from stock_market where stock_code = %s and trade_date = %s"""
+            query_sql = """SELECT COUNT(1) FROM stock_market WHERE stock_code = %s AND trade_date = %s"""
             self.cursor.execute(query_sql, (
                                 item['stock_code'][0].encode('utf-8'),
                                 item['trade_date'][0].encode('utf-8')))
@@ -195,9 +198,9 @@ class StockSpiderPipeline(object):
     def insertStockDividend(self, item):
         try:
             # 先查询先前是否已抓取过
-            query_sql = """select count(1) from stock_dividend where stock_code = %s and ex_dividend_date = %s and bonus_year = %s"""
+            query_sql = """SELECT COUNT(1) FROM stock_dividend WHERE stock_code = %s AND ex_dividend_date = %s AND bonus_year = %s"""
             self.cursor.execute(query_sql, (
-                                item['stock_code'][0].encode('utf-8'),
+                                item['stock_code'],
                                 item['ex_dividend_date'],
                                 item['bonus_year']))
 
@@ -247,6 +250,42 @@ class StockSpiderPipeline(object):
                 item['hold_rate'],
                 item['freezing_count'],
                 item['pledged_count'],
+                item['create_time']
+            ))
+
+            # 事务提交
+            self.conn.commit()
+        except pymysql.Error as err:
+            # 事务回滚
+            self.conn.rollback()
+            print("OS error: {0}".format(err))
+            raise
+
+    # 插入股票所属板块（标签）信息
+    def insertStockTypeItem(self, item):
+        try:
+            # 先查询先前是否已抓取过
+            query_sql = """SELECT COUNT(1) FROM stock_type WHERE stock_code = %s AND stock_type_code = %s"""
+
+            self.cursor.execute(query_sql, (
+                item['stock_code'],
+                item['stock_type_code']))
+
+            print("===判断股票所属板块sql:" + query_sql)
+            count = self.cursor.fetchone()
+            if (int(count[0]) >= 1):
+                return
+
+            # 如果先前没有抓取过，就直接插入
+            insert_sql = """INSERT INTO stock_type(stock_code, stock_name, stock_type_code,
+                    stock_type, create_time) VALUES (%s, %s, %s, %s, %s)"""
+
+            print("===插入股票所属板块sql:" + insert_sql)
+            self.cursor.execute(insert_sql, (
+                item['stock_code'],
+                item['stock_name'].encode('utf-8'),
+                item['stock_type_code'],
+                item['stock_type'],
                 item['create_time']
             ))
 
